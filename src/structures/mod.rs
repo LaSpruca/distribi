@@ -3,6 +3,7 @@ mod object;
 use core::fmt;
 use std::{collections::HashMap, convert::TryFrom, error::Error, fs::read_to_string};
 
+use log::debug;
 pub use object::*;
 
 pub fn parse_structure(file_name: &str) -> Result<Object, ParseError> {
@@ -34,7 +35,7 @@ pub fn parse_structure(file_name: &str) -> Result<Object, ParseError> {
 
             if name.starts_with("@") {
                 let import_filename = format!("structures/{}.dst", name.replace("@", ""));
-                println!("Importing {}", import_filename);
+                debug!("Importing {}", import_filename);
                 imported_objects.insert(
                     field_type.to_string(),
                     parse_structure(import_filename.as_str()).unwrap(),

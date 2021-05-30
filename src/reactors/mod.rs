@@ -2,6 +2,7 @@ mod errors;
 
 pub use errors::*;
 use hlua::Lua;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::read_to_string};
 use walkdir::WalkDir;
@@ -13,7 +14,7 @@ pub fn load_reactors() -> Result<ReactorList, ReactorParseError> {
         .filter_map(|e| e.ok())
         .filter(|e| e.path().is_file() && e.path().extension().unwrap() == "lua")
     {
-        println!("=> Opening lua file {}", file_path.path().display());
+        debug!("Opening lua file {}", file_path.path().display());
 
         let reactor_def = match read_reactor(file_path.path().to_str().unwrap()) {
             Ok(e) => e,
