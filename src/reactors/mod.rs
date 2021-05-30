@@ -146,7 +146,7 @@ impl Into<Reactor> for ReactorDef {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Reactor {
     mutating: bool,
     posting: bool,

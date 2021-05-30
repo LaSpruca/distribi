@@ -1,10 +1,9 @@
+pub mod logger;
 pub mod reactors;
 pub mod structures;
 
-use crate::reactors::load_reactors;
+use crate::{logger::log_setup, reactors::load_reactors};
 use actix_web::{dev::Body, get, web::Bytes, App, HttpResponse, HttpServer, Result, Scope};
-use chrono::SecondsFormat;
-use colored::*;
 use log::{error, info};
 use std::{
     collections::HashMap,
@@ -28,6 +27,7 @@ fn setup() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    println!("no");
     log_setup();
     setup_distribi();
 
@@ -86,42 +86,4 @@ fn setup_distribi() {
     output_file.write_all(serialized.as_slice()).unwrap();
 
     info!("Written binary")
-}
-
-fn log_setup() {
-    if let Err(_) = std::env::var("RUST_LOG") {
-        std::env::set_var("RUST_LOG", "info");
-    }
-
-    env_logger::builder()
-        .format(|buf, record| {
-            writeln!(
-                buf,
-                "[ {1} {0} ] {2}",
-                chrono::Local::now()
-                    .to_rfc3339_opts(SecondsFormat::Millis, true)
-                    .as_str()
-                    .bright_black(),
-                // Color the log levels
-                match record.level() {
-                    log::Level::Error => {
-                        " ERROR   ".red().bold()
-                    }
-                    log::Level::Warn => {
-                        " WARNING ".yellow().bold()
-                    }
-                    log::Level::Info => {
-                        " INFO    ".blue().bold()
-                    }
-                    log::Level::Debug => {
-                        " DEBUG   ".white().bold()
-                    }
-                    log::Level::Trace => {
-                        " TRACE   ".black().bold()
-                    }
-                },
-                record.args()
-            )
-        })
-        .init();
 }
