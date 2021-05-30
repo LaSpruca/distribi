@@ -6,4 +6,4 @@ It go brrr
 
 Why you would use this?
 
-¯\_(ツ)_/¯
+¯\\_(ツ)_/¯
