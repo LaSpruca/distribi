@@ -2,7 +2,7 @@ mod errors;
 
 pub use errors::*;
 use hlua::Lua;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::read_to_string};
 use walkdir::WalkDir;
 
@@ -145,7 +145,7 @@ impl Into<Reactor> for ReactorDef {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Reactor {
     mutating: bool,
     posting: bool,

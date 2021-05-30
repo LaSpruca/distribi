@@ -5,11 +5,21 @@ use std::{collections::HashMap, convert::TryFrom, error::Error, fs::read_to_stri
 
 pub use object::*;
 
-pub fn parse(source: &str, file_name: &str) -> Result<Object, ParseError> {
+pub fn parse_structure(file_name: &str) -> Result<Object, ParseError> {
     let space = regex::Regex::new("[ ]+").unwrap();
 
     let mut obj_definition = Object::new();
     let mut imported_objects = HashMap::<String, Object>::new();
+
+    let source = match read_to_string(file_name) {
+        Err(error) => {
+            return Err(ParseError {
+                file: file_name.to_string(),
+                error: error.into(),
+            })
+        }
+        Ok(val) => val,
+    };
 
     for line in source.split("\n") {
         if line.starts_with("#") {
@@ -25,18 +35,9 @@ pub fn parse(source: &str, file_name: &str) -> Result<Object, ParseError> {
             if name.starts_with("@") {
                 let import_filename = format!("structures/{}.dst", name.replace("@", ""));
                 println!("Importing {}", import_filename);
-                let source = match read_to_string(import_filename.as_str()) {
-                    Err(error) => {
-                        return Err(ParseError {
-                            file: file_name.to_string(),
-                            error: error.into(),
-                        })
-                    }
-                    Ok(val) => val,
-                };
                 imported_objects.insert(
                     field_type.to_string(),
-                    parse(&source, import_filename.as_str()).unwrap(),
+                    parse_structure(import_filename.as_str()).unwrap(),
                 );
                 continue;
             }
