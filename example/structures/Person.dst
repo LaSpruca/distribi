@@ -1,0 +1,7 @@
+@util/Date date
+
+firstName       String
+lastName        String
+dateOfBirth     @date
+someMap         String->Bool
+someArray       ;String
