@@ -2,18 +2,42 @@ pub mod reactors;
 pub mod structures;
 
 use crate::reactors::load_reactors;
+use actix_web::{dev::Body, get, web::Bytes, App, HttpResponse, HttpServer, Result, Scope};
 use chrono::SecondsFormat;
 use colored::*;
 use log::{error, info};
 use std::{
     collections::HashMap,
     env::current_dir,
-    fs::{self, create_dir},
-    io::Write,
+    fs::{self, create_dir, File},
+    io::{Read, Write},
+    iter::FromIterator,
     path::Path,
     process::exit,
 };
 use structures::parse_structure;
+
+#[get("/setup")]
+fn setup() -> HttpResponse {
+    let mut file = File::open("out/data.bin").unwrap();
+    let metadata = file.metadata().unwrap();
+    let mut bytes = vec![0; metadata.len() as usize];
+    file.read(&mut bytes).unwrap();
+    HttpResponse::Ok().message_body(Body::Bytes(Bytes::from_iter(bytes)))
+}
+
+#[actix_web::main]
+async fn main() -> Result<()> {
+    log_setup();
+    setup_distribi();
+
+    HttpServer::new(|| App::new().service(Scope::new("/distribi").service(setup)))
+        .bind("0.0.0.0:8080")?
+        .run()
+        .await?;
+
+    Ok(())
+}
 
 fn setup_distribi() {
     info!("Loading reactors");
@@ -64,7 +88,7 @@ fn setup_distribi() {
     info!("Written binary")
 }
 
-fn main() {
+fn log_setup() {
     if let Err(_) = std::env::var("RUST_LOG") {
         std::env::set_var("RUST_LOG", "info");
     }
@@ -81,24 +105,23 @@ fn main() {
                 // Color the log levels
                 match record.level() {
                     log::Level::Error => {
-                        "  ERROR  ".red().bold()
+                        " ERROR   ".red().bold()
                     }
                     log::Level::Warn => {
                         " WARNING ".yellow().bold()
                     }
                     log::Level::Info => {
-                        "   INFO  ".blue().bold()
+                        " INFO    ".blue().bold()
                     }
                     log::Level::Debug => {
-                        "  DEBUG  ".white().bold()
+                        " DEBUG   ".white().bold()
                     }
                     log::Level::Trace => {
-                        "  TRACE  ".black().bold()
+                        " TRACE   ".black().bold()
                     }
                 },
                 record.args()
             )
         })
         .init();
-    setup_distribi();
 }
